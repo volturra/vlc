@@ -182,8 +182,8 @@
 /* Define if you have the iconv() function and it works. */
 #mesondefine HAVE_ICONV
 
-/* Define to 1 if you have GNU libidn. */
-#mesondefine HAVE_IDN
+/* Define to 1 if you have GNU libidn2. */
+#mesondefine HAVE_IDN2
 
 /* Define to 1 if you have the `if_nameindex' function. */
 #mesondefine HAVE_IF_NAMEINDEX

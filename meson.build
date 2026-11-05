@@ -206,10 +206,10 @@ else
     foundation_dep = []
 endif
 
-# Domain name i18n support via GNU libidn
-idn_dep = dependency('libidn', required: false)
+# Domain name i18n support via GNU libidn2
+idn_dep = dependency('libidn2', version: '>= 2.0.5', required: false)
 if idn_dep.found()
-    cdata.set('HAVE_IDN', 1)
+    cdata.set('HAVE_IDN2', 1)
 endif
 
 # Threads

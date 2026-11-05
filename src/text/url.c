@@ -41,6 +41,7 @@
 #endif
 
 #include <vlc_common.h>
+#include <vlc_charset.h>
 #include <vlc_memstream.h>
 #include <vlc_url.h>
 #include <vlc_fs.h>
@@ -955,11 +956,10 @@ char *vlc_uri_fixup(const char *str)
     return vlc_memstream_close(&stream) ? NULL : stream.ptr;
 }
 
-#if defined (HAVE_IDN)
-# include <idna.h>
+#if defined (HAVE_IDN2)
+# include <idn2.h>
 #elif defined (_WIN32)
 # include <windows.h>
-# include <vlc_charset.h>
 #endif
 
 /**
@@ -969,18 +969,23 @@ char *vlc_uri_fixup(const char *str)
  */
 static char *vlc_idna_to_ascii (const char *idn)
 {
-#if defined (HAVE_IDN)
+    /* Keep ASCII domain names as is; in particular, do not lower-case them */
+    if (IsASCII(idn) != NULL)
+        return strdup(idn);
+
+#if defined (HAVE_IDN2)
     char *adn;
 
-    switch (idna_to_ascii_8z(idn, &adn, IDNA_ALLOW_UNASSIGNED))
+    switch (idn2_to_ascii_8z(idn, &adn, IDN2_NFC_INPUT | IDN2_NONTRANSITIONAL))
     {
-        case IDNA_SUCCESS:
-            return adn;
-        case IDNA_MALLOC_ERROR:
+        case IDN2_OK:
+        {   /* The library may not share the heap of the caller */
+            char *ret = strdup(adn);
+            idn2_free(adn);
+            return ret;
+        }
+        case IDN2_MALLOC:
             errno = ENOMEM;
-            return NULL;
-        case IDNA_DLOPEN_ERROR:
-            errno = ENOSYS;
             return NULL;
         default:
             errno = EINVAL;
@@ -989,9 +994,6 @@ static char *vlc_idna_to_ascii (const char *idn)
 
 #elif defined (_WIN32)
     char *ret = NULL;
-
-    if (idn[0] == '\0')
-        return strdup("");
 
     wchar_t *wide = ToWide (idn);
     if (wide == NULL)
@@ -1021,14 +1023,7 @@ error:
 
 #else
     /* No IDN support, filter out non-ASCII domain names */
-    for (const char *p = idn; *p; p++)
-        if (((unsigned char)*p) >= 0x80)
-        {
-            errno = ENOSYS;
-            return NULL;
-        }
-
-    return strdup (idn);
-
+    errno = ENOSYS;
+    return NULL;
 #endif
 }

@@ -1303,13 +1303,13 @@ AM_CONDITIONAL([HAVE_ZLIB], [ test "${have_zlib}" = "yes" ])
 
 
 dnl
-dnl Domain name i18n support via GNU libidn
+dnl Domain name i18n support via GNU libidn2
 dnl
-PKG_CHECK_MODULES([IDN], [libidn], [
-  have_libidn="yes"
-  AC_DEFINE([HAVE_IDN], 1, [Define to 1 if you have GNU libidn.])
+PKG_CHECK_MODULES([IDN], [libidn2 >= 2.0.5], [
+  have_libidn2="yes"
+  AC_DEFINE([HAVE_IDN2], 1, [Define to 1 if you have GNU libidn2.])
 ], [
-  have_libidn="no"
+  have_libidn2="no"
 ])
 
 

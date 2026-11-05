@@ -41,8 +41,8 @@ PACKAGES="
     libgcrypt-devel gnutls-devel libxml2-devel lua-devel taglib-devel
     libssh2-devel libnfs-devel srt-devel
     libebml-devel libmatroska-devel libdav1d-devel libvpx-devel x264-devel x265-devel
-    libmpeg2-devel faad2-devel flac-devel libvorbis-devel opus-devel
-    libogg-devel libtheora-devel libsamplerate-devel
+    libmpeg2-devel faad2-devel mpg123-devel flac-devel libvorbis-devel opus-devel
+    libogg-devel libtheora-devel libsamplerate-devel soxr-devel
     libarchive-devel libdvdnav-devel libdvdread-devel libbluray-devel
     libsecret-devel dbus-devel libnotify-devel
 "

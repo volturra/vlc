@@ -49,6 +49,31 @@ Not all platforms receive the same amount of care, due to our limited resources.
 the [iOS app](https://code.videolan.org/videolan/vlc-ios/) are located in different repositories
 than the main one.
 
+# Building in a container
+
+On Linux, VLC can be built without installing any of its dependencies on the host,
+using the same `vlc-debian-unstable` image as the `debian-meson` CI job.
+Only [Podman](https://podman.io/) *(rootless works)* or Docker is required.
+
+```sh
+extras/docker/vlc-docker.sh build        # configure (first run) and build into build-docker/
+extras/docker/vlc-docker.sh test         # run the test suite
+extras/docker/vlc-docker.sh run file.mkv # run the built VLC with the host display and audio
+extras/docker/vlc-docker.sh shell        # interactive shell in the build environment
+extras/docker/vlc-docker.sh setup -Dextra_checks=true  # reconfigure with Meson options
+```
+
+- The image tag is read from `extras/ci/gitlab-ci.yml`, so it follows upstream CI.
+  The image is about 4 GB.
+- Build output is owned by the host user, and the source tree is mounted at the same path
+  as on the host, so `build-docker/compile_commands.json` can be used by editors.
+- `run` starts `bin/vlc-static`, which loads plugins from the build tree. The binary
+  links against the container's libraries, so it must be run through the script.
+- `VLC_DOCKER_IMAGE` and `VLC_DOCKER_BUILDDIR` override the image and the build directory.
+
+For a native build, see [INSTALL](INSTALL) and the
+[build guides on the wiki](https://wiki.videolan.org/Category:Building/).
+
 # Contributing & Community
 
 **VLC** is maintained by a community of people, and VideoLAN is not paying any of them.\
@@ -126,6 +151,7 @@ contrib/           - Facilities for retrieving external libraries and building
 doc/               - Miscellaneous documentation.
 extras/analyser    - Code analyser and editor specific files.
 extras/buildsystem - Different build system specific files.
+extras/docker      - Script to build and run VLC in the CI container image.
 extras/misc        - Files that don't fit in the other extras/ categories.
 extras/package     - VLC packaging specific files such as spec files.
 extras/tools/      - Facilities for retrieving external building tools needed

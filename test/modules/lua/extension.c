@@ -92,9 +92,19 @@ static int OpenIntf(vlc_object_t *root)
     var_AddCallback(libvlc, "test-lua-deactivate", OnLuaEventTriggered, &sem_deactivate);
     var_AddCallback(libvlc, "test-lua-input-changed", OnLuaEventTriggered, &sem_input);
 
-    /* Check that the extension from the test is correctly probed. */
-    assert(mgr->extensions.i_size == 1);
-    extension_Activate(mgr, mgr->extensions.p_elems[0]);
+    /* Check that the extension from the test is correctly probed. The
+     * extensions of an installed VLC or of the build tree are probed too, so
+     * look for the one loaded from the test directory. */
+    static const char test_dir[] = TOP_SRCDIR "/test/modules/";
+    extension_t *ext = NULL;
+    ARRAY_FOREACH(ext, mgr->extensions)
+    {
+        if (strncmp(ext->psz_name, test_dir, sizeof (test_dir) - 1) == 0)
+            break;
+        ext = NULL;
+    }
+    assert(ext != NULL);
+    extension_Activate(mgr, ext);
     vlc_sem_wait(&sem_activate);
 
     vlc_player_Lock(player);
@@ -107,7 +117,7 @@ static int OpenIntf(vlc_object_t *root)
 
     vlc_sem_wait(&sem_input);
 
-    extension_Deactivate(mgr, mgr->extensions.p_elems[0]);
+    extension_Deactivate(mgr, ext);
     vlc_sem_wait(&sem_deactivate);
 
     var_DelCallback(libvlc, "test-lua-activate", OnLuaEventTriggered, &sem_activate);

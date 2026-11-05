@@ -74,7 +74,7 @@ extras/toolbox/vlc-toolbox.sh shell      # enter the toolbox
   build dependency.
 - FFmpeg comes from [RPM Fusion](https://rpmfusion.org/), as on a typical Fedora desktop,
   and NVDEC is enabled for hardware decoding with the NVIDIA proprietary driver.
-- A few optional dependencies (libidn, libupnp, libmad, speexdsp) are left out because
+- A few optional dependencies (libupnp, libmad, speexdsp) are left out because
   their runtime libraries are not on a default Fedora desktop. To add one back, install
   its runtime package on the host and its `-devel` package in the toolbox.
 

@@ -39,7 +39,7 @@ PACKAGES="
     freetype-devel fribidi-devel harfbuzz-devel fontconfig-devel libass-devel
     libpng-devel libjpeg-turbo-devel zvbi-devel
     libgcrypt-devel gnutls-devel libxml2-devel lua-devel taglib-devel
-    libssh2-devel libnfs-devel srt-devel
+    libidn2-devel libssh2-devel libnfs-devel srt-devel
     libebml-devel libmatroska-devel libdav1d-devel libvpx-devel x264-devel x265-devel
     libmpeg2-devel faad2-devel mpg123-devel flac-devel libvorbis-devel opus-devel
     libogg-devel libtheora-devel libsamplerate-devel soxr-devel
@@ -47,9 +47,9 @@ PACKAGES="
     libsecret-devel dbus-devel libnotify-devel
 "
 # Not installed: they would be linked in but their runtime libraries are not
-# on a stock Fedora desktop (libidn would even be linked into libvlccore).
-# Install the runtime package on the host first to add one back.
-#   libidn-devel libupnp-devel libmad-devel speexdsp-devel
+# on a stock Fedora desktop. Install the runtime package on the host first to
+# add one back.
+#   libupnp-devel libmad-devel speexdsp-devel
 
 inbox() {
     toolbox run -c "$BOX" sh -c 'cd "$1" && shift && exec "$@"' sh "$SRCDIR" "$@"

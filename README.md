@@ -49,29 +49,36 @@ Not all platforms receive the same amount of care, due to our limited resources.
 the [iOS app](https://code.videolan.org/videolan/vlc-ios/) are located in different repositories
 than the main one.
 
-# Building in a container
+# Building on Fedora with a toolbox
 
-On Linux, VLC can be built without installing any of its dependencies on the host,
-using the same `vlc-debian-unstable` image as the `debian-meson` CI job.
-Only [Podman](https://podman.io/) *(rootless works)* or Docker is required.
+On Fedora, VLC can be built natively while keeping its build dependencies out of the
+host system: the compilers, Meson and every `-devel` package live in a
+[toolbox](https://containertoolbx.org/) container of the same Fedora release, and the
+result is installed in your home directory, where it runs directly on the host with the
+host's own libraries, GPU and display. No `sudo` is needed on the host.
 
 ```sh
-extras/docker/vlc-docker.sh build        # configure (first run) and build into build-docker/
-extras/docker/vlc-docker.sh test         # run the test suite
-extras/docker/vlc-docker.sh run file.mkv # run the built VLC with the host display and audio
-extras/docker/vlc-docker.sh shell        # interactive shell in the build environment
-extras/docker/vlc-docker.sh setup -Dextra_checks=true  # reconfigure with Meson options
+extras/toolbox/vlc-toolbox.sh create     # create the vlc-dev toolbox with the build dependencies
+extras/toolbox/vlc-toolbox.sh build      # configure (first run) and build into build-native/
+extras/toolbox/vlc-toolbox.sh test       # run the test suite
+extras/toolbox/vlc-toolbox.sh install    # install to ~/.local/opt/vlc
+extras/toolbox/vlc-toolbox.sh setup -Dextra_checks=true  # reconfigure with Meson options
+extras/toolbox/vlc-toolbox.sh shell      # enter the toolbox
 ```
 
-- The image tag is read from `extras/ci/gitlab-ci.yml`, so it follows upstream CI.
-  The image is about 4 GB.
-- Build output is owned by the host user, and the source tree is mounted at the same path
-  as on the host, so `build-docker/compile_commands.json` can be used by editors.
-- `run` starts `bin/vlc-static`, which loads plugins from the build tree. The binary
-  links against the container's libraries, so it must be run through the script.
-- `VLC_DOCKER_IMAGE` and `VLC_DOCKER_BUILDDIR` override the image and the build directory.
+- `install` links `vlc` into `~/.local/bin` and adds the desktop entries and icons to
+  `~/.local/share`. The binaries carry an rpath to the prefix, so no environment
+  variables are needed. To install elsewhere, set `PREFIX` for `setup`, `install` and
+  `uninstall` alike.
+- `uninstall` removes the installation; `destroy` removes the toolbox and with it every
+  build dependency.
+- FFmpeg comes from [RPM Fusion](https://rpmfusion.org/), as on a typical Fedora desktop,
+  and NVDEC is enabled for hardware decoding with the NVIDIA proprietary driver.
+- A few optional dependencies (libidn, libupnp, libmad, speexdsp) are left out because
+  their runtime libraries are not on a default Fedora desktop. To add one back, install
+  its runtime package on the host and its `-devel` package in the toolbox.
 
-For a native build, see [INSTALL](INSTALL) and the
+For other systems, see [INSTALL](INSTALL) and the
 [build guides on the wiki](https://wiki.videolan.org/Category:Building/).
 
 # Contributing & Community
@@ -151,7 +158,7 @@ contrib/           - Facilities for retrieving external libraries and building
 doc/               - Miscellaneous documentation.
 extras/analyser    - Code analyser and editor specific files.
 extras/buildsystem - Different build system specific files.
-extras/docker      - Script to build and run VLC in the CI container image.
+extras/toolbox     - Script to build VLC on Fedora with its dependencies in a toolbox.
 extras/misc        - Files that don't fit in the other extras/ categories.
 extras/package     - VLC packaging specific files such as spec files.
 extras/tools/      - Facilities for retrieving external building tools needed

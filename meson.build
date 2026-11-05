@@ -227,6 +227,10 @@ if not x11_dep.found()
     cdata.set('X_DISPLAY_MISSING', 1)
 endif
 
+# Check for D-Bus, used by the core and the vlc binary for the single instance
+# mode and MPRIS, and by some modules
+dbus_dep = dependency('dbus-1', version: '>= 1.6.0', required: get_option('dbus'))
+
 #
 # Check for headers
 #

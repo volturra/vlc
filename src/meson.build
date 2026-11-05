@@ -46,6 +46,11 @@ libvlccore_deps = [
 vlccore_cargs = [ '-DMODULE_STRING="core"', '-DHAVE_DYNAMIC_PLUGINS' ]
 libvlccore_link_args = []
 
+if dbus_dep.found()
+    libvlccore_deps += dbus_dep
+    vlccore_cargs += '-DHAVE_DBUS'
+endif
+
 if host_system == 'darwin'
     libvlccore_deps += foundation_dep
     libvlccore_deps += corefoundation_dep

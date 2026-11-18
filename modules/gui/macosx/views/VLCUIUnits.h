@@ -69,10 +69,14 @@ extern NSString * const VLCLibraryCollectionViewItemAdjustmentKey;
 
 @property (class, readonly) const CGFloat disabledOpacity;
 
+// Minimum mouse movement, in points, before a click becomes a drag.
+@property (class, readonly) const CGFloat mouseDragThreshold;
+
 // Common icon, illustration and action-button sizes.
 @property (class, readonly) const CGFloat smallIconSize;
 @property (class, readonly) const CGFloat mediumIconSize;
 @property (class, readonly) const CGFloat largeIconSize;
+@property (class, readonly) const CGFloat smallIconButtonSize;
 @property (class, readonly) const CGFloat largeIconContainerSize;
 @property (class, readonly) const CGFloat largeIllustrationSize;
 @property (class, readonly) const CGFloat largeActionButtonHeight;

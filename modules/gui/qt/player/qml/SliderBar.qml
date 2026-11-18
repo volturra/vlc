@@ -268,8 +268,7 @@ T.ProgressBar {
                 }
             }
 
-            onCentroidChanged: {
-                // FIXME: Qt 6.5 use xAxis.onActiveValueChanged in the DragHandler
+            xAxis.onActiveValueChanged: {
                 if (filterEvents) {
                     Qt.callLater(dragHandler.moveControl)
                 } else {
@@ -506,7 +505,7 @@ T.ProgressBar {
                 },
                 State {
                     name: "buffering not started"
-                    when: control.visible && Player.buffering === 0
+                    when: control.visible && Player.buffering === 0 && Player.isStarted
                     PropertyChanges {
                         target: bufferRect
                         width: bufferAnimWidth
@@ -528,7 +527,7 @@ T.ProgressBar {
                 },
                 State {
                     name: "playing from buffer"
-                    when: control.visible && !bufferRect.display
+                    when: control.visible && bufferRect.buffering && !bufferRect.display
                     PropertyChanges {
                         target: bufferRect
                         width: Player.buffering * parent.width

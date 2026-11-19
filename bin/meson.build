@@ -62,6 +62,33 @@ if build_vlc and (host_system != 'darwin' or have_osx) and not have_win_store an
         win_subsystem: 'windows'
     )
 
+    # Interface aliases (cvlc, rvlc, ...), as installed by autotools
+    if host_system not in ['darwin', 'windows']
+        vlc_aliases = { 'cvlc': 'dummy', 'rvlc': 'rc' }
+        foreach alias, plugin : { 'qvlc': 'qt', 'svlc': 'skins2', 'nvlc': 'ncurses' }
+            if vlc_plugins_targets.has_key(plugin)
+                vlc_aliases += { alias: plugin }
+            endif
+        endforeach
+
+        make_alias = find_program(vlc_src_root / 'make-alias')
+        foreach alias, intf : vlc_aliases
+            custom_target(alias,
+                command: [make_alias, '@OUTPUT@', intf],
+                env: {
+                    'bindir': bindir_path,
+                    'transform': '',
+                    'program_prefix': '',
+                    'program_suffix': '',
+                },
+                output: alias,
+                install: true,
+                install_dir: bindir_path,
+                install_mode: 'rwxr-xr-x',
+            )
+        endforeach
+    endif
+
     vlc_top_builddir_def = '-DTOP_BUILDDIR="@0@"'.format(vlc_build_root)
     vlc_top_srcdir_def = '-DTOP_SRCDIR="@0@"'.format(vlc_src_root)
 

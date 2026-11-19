@@ -66,8 +66,9 @@ extras/toolbox/vlc-toolbox.sh setup -Dextra_checks=true  # reconfigure with Meso
 extras/toolbox/vlc-toolbox.sh shell      # enter the toolbox
 ```
 
-- `install` links `vlc` into `~/.local/bin` and adds the desktop entries and icons to
-  `~/.local/share`. The binaries carry an rpath to the prefix, so no environment
+- `install` links `vlc` and its interface aliases (`cvlc`, `rvlc`, plus `qvlc`, `svlc` and
+  `nvlc` when those interfaces are built) into `~/.local/bin` and adds the desktop entries
+  and icons to `~/.local/share`. The binaries carry an rpath to the prefix, so no environment
   variables are needed. To install elsewhere, set `PREFIX` for `setup`, `install` and
   `uninstall` alike.
 - `uninstall` removes the installation; `destroy` removes the toolbox and with it every

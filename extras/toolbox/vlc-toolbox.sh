@@ -108,14 +108,14 @@ case "$cmd" in
         # The cache copied from the build tree is stale once installed
         "$PREFIX/libexec/vlc/vlc-cache-gen" "$PREFIX/lib64/vlc/plugins"
         mkdir -p "$BINHOME"
-        for b in vlc cvlc rvlc qvlc nvlc; do
+        for b in vlc cvlc rvlc qvlc svlc nvlc; do
             [ -e "$PREFIX/bin/$b" ] && ln -sf "$PREFIX/bin/$b" "$BINHOME/$b"
         done
         desktop_files
         echo "installed to $PREFIX"
         ;;
     uninstall)
-        for b in vlc cvlc rvlc qvlc nvlc; do
+        for b in vlc cvlc rvlc qvlc svlc nvlc; do
             [ "$(readlink "$BINHOME/$b")" = "$PREFIX/bin/$b" ] && rm -f "$BINHOME/$b"
         done
         for f in vlc vlc-openbd vlc-opendvd vlc-openvcd vlc-opencda; do

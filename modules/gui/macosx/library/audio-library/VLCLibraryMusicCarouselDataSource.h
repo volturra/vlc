@@ -1,7 +1,7 @@
 /*****************************************************************************
- * VLCLibraryVideoCollectionViewTableViewCellDataSource.h: MacOS X interface module
+ * VLCLibraryMusicCarouselDataSource.h: MacOS X interface module
  *****************************************************************************
- * Copyright (C) 2022 VLC authors and VideoLAN
+ * Copyright (C) 2026 VLC authors and VideoLAN
  *
  * Authors: Claudio Cambra <developer@claudiocambra.com>
  *
@@ -20,26 +20,28 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#import <Cocoa/Cocoa.h>
-
 #import "library/VLCLibraryCollectionViewDataSource.h"
-
-@class VLCLibraryHomeViewVideoGridContainerView;
-@class VLCLibraryVideoCollectionViewGroupDescriptor;
+#import "library/VLCLibraryDataTypes.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-extern NSString * const VLCLibraryVideoCollectionViewDataSourceDisplayedCollectionChangedNotification;
+@class VLCLibraryModel;
 
-@interface VLCLibraryHomeViewVideoContainerViewDataSource : NSObject <VLCLibraryCollectionViewDataSource>
+extern NSNotificationName const VLCLibraryMusicCarouselDataSourceReloaded;
 
-@property (readwrite, weak) NSCollectionView *collectionView;
-@property (readwrite, copy) NSUserInterfaceItemIdentifier collectionViewItemIdentifier;
-@property (readwrite, assign, nonatomic) VLCLibraryVideoCollectionViewGroupDescriptor *groupDescriptor;
-@property (readwrite, assign) VLCLibraryHomeViewVideoGridContainerView *parentCell;
+// The data source calls this block on a background queue to fetch the items for
+// a Music carousel. Return nil to keep the current items visible while a model
+// cache loads. Return an empty array when there are no items to show.
+typedef NSArray<id<VLCMediaLibraryItemProtocol>> * _Nullable (^VLCLibraryMusicCarouselItemsProvider)(VLCLibraryModel *libraryModel);
 
-- (void)setup;
-- (void)reloadData;
+@interface VLCLibraryMusicCarouselDataSource : NSObject <VLCLibraryCollectionViewDataSource>
+
+@property (readwrite, weak, nonatomic) NSCollectionView *collectionView;
+
+- (instancetype)initWithParentType:(VLCMediaLibraryParentGroupType)parentType
+                     itemsProvider:(VLCLibraryMusicCarouselItemsProvider)itemsProvider
+                resetNotifications:(NSArray<NSNotificationName> *)resetNotifications
+                    itemIdentifier:(NSString *)itemIdentifier;
 
 @end
 

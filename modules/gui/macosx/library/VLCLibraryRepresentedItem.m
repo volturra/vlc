@@ -213,7 +213,12 @@
         return self.parentItem.mediaItems;
     }
 
-    if (self.parentType == VLCMediaLibraryParentGroupTypeAllFavorites) {
+    if (self.parentType == VLCMediaLibraryParentGroupTypeAllFavorites ||
+        self.parentType == VLCMediaLibraryParentGroupTypeFavoriteAudios ||
+        self.parentType == VLCMediaLibraryParentGroupTypeMostPlayedAudios ||
+        self.parentType == VLCMediaLibraryParentGroupTypeRecentlyAddedVideos ||
+        self.parentType == VLCMediaLibraryParentGroupTypeRecentlyAddedAudios ||
+        self.parentType == VLCMediaLibraryParentGroupTypeRecentAudios) {
         VLCLibraryModel * const libraryModel = VLCMain.sharedInstance.libraryController.libraryModel;
         return [libraryModel listOfMediaItemsForParentType:self.parentType];
     }

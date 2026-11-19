@@ -163,7 +163,8 @@ static NSValue * _Nullable inputItemIdentifier(VLCInputItem * _Nullable const in
         [self.nodeToDisplay clearChildrenCache];
     }
 
-    if (self.parentBaseDataSource.childDataSource != self) {
+    if (self.parentBaseDataSource.childDataSource != self ||
+        self.tableView.dataSource != self) {
         return;
     }
 
@@ -243,6 +244,15 @@ static NSValue * _Nullable inputItemIdentifier(VLCInputItem * _Nullable const in
 {
     if (notification.object != self.displayedMediaSource)
         return;
+
+    VLCInputItem * const changedParentInputItem =
+        notification.userInfo[VLCMediaSourceChildrenParentInputItemKey];
+    VLCInputItem * const displayedInputItem = self.nodeToDisplay.inputItem;
+    if (changedParentInputItem != nil &&
+        changedParentInputItem.vlcInputItem != displayedInputItem.vlcInputItem) {
+        return;
+    }
+
     dispatch_async(dispatch_get_main_queue(), ^{
         [self clearDisplayedNodeChildrenCaches];
         // Navigation history retains inactive data sources that also receive these notifications.
@@ -265,7 +275,8 @@ static NSValue * _Nullable inputItemIdentifier(VLCInputItem * _Nullable const in
     self.nodeObservation = [self.displayedMediaSource observeInputNode:nodeToDisplay
                                                               onChange:^(VLCMediaSourceNodeChange change) {
         const typeof(self) strongSelf = weakSelf;
-        if (strongSelf == nil || strongSelf.parentBaseDataSource.childDataSource != strongSelf) {
+        if (strongSelf == nil || strongSelf.parentBaseDataSource.childDataSource != strongSelf ||
+            strongSelf.tableView.dataSource != strongSelf) {
             return;
         }
         switch (change) {
@@ -634,6 +645,11 @@ static NSValue * _Nullable inputItemIdentifier(VLCInputItem * _Nullable const in
 
 - (void)reloadData
 {
+    if (self.parentBaseDataSource.childDataSource != self ||
+        self.tableView.dataSource != self ||
+        self.collectionView.dataSource != self) {
+        return;
+    }
     NSParameterAssert(self.tableView.dataSource == self);
 
     if (!_collectionView.hidden) {

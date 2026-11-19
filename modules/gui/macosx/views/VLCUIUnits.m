@@ -106,6 +106,11 @@ NSString * const VLCLibraryCollectionViewItemAdjustmentKey = @"VLCLibraryCollect
     return .5;
 }
 
++ (const CGFloat)mouseDragThreshold
+{
+    return 3.;
+}
+
 + (const CGFloat)smallIconSize
 {
     return self.largeSpacing;
@@ -119,6 +124,11 @@ NSString * const VLCLibraryCollectionViewItemAdjustmentKey = @"VLCLibraryCollect
 + (const CGFloat)largeIconSize
 {
     return 26.;
+}
+
++ (const CGFloat)smallIconButtonSize
+{
+    return 28.;
 }
 
 + (const CGFloat)largeIconContainerSize

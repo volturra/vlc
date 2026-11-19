@@ -1433,7 +1433,7 @@ static int ftp_StartStream( vlc_object_t *p_access, access_sys_t *p_sys,
     }
     else
     {
-        unsigned char a1, a2, a3, a4, p1, p2;
+        unsigned a1, a2, a3, a4, p1, p2;
         int fd = vlc_tls_GetFD( p_sys->cmd );
         union {
             struct sockaddr    sa;
@@ -1441,19 +1441,23 @@ static int ftp_StartStream( vlc_object_t *p_access, access_sys_t *p_sys,
         } su;
         socklen_t salen = sizeof (su);
 
-        if( sscanf( psz_parser, "(%hhu,%hhu,%hhu,%hhu,%hhu,%hhu",
+        /* The data connection must go to the same server as the control
+         * connection, so compare against the peer address. */
+        if( sscanf( psz_parser, "(%3u,%3u,%3u,%3u,%3u,%3u",
                     &a1, &a2, &a3, &a4, &p1, &p2 ) < 6 ||
-            getsockname( fd, &su.sa, &salen ) < 0 ||
+            ( a1 | a2 | a3 | a4 | p1 | p2 ) > 255 ||
+            getpeername( fd, &su.sa, &salen ) < 0 ||
             salen < sizeof (struct sockaddr_in) ||
             su.sin.sin_family != AF_INET ||
-            su.sin.sin_addr.s_addr != htonl((a1<<24)|(a2<<16)|(a3<<8)|a4))
+            su.sin.sin_addr.s_addr != htonl( ((uint32_t)a1 << 24) |
+                                             (a2 << 16) | (a3 << 8) | a4 ) )
         {
             free( psz_arg );
             msg_Err( p_access, "cannot parse passive mode response" );
             return VLC_EGENERIC;
         }
 
-        snprintf( ipv4buf, sizeof (ipv4buf), "%hhu.%hhu.%hhu.%hhu",
+        snprintf( ipv4buf, sizeof (ipv4buf), "%u.%u.%u.%u",
                   a1, a2, a3, a4 );
         psz_ip = ipv4buf;
         i_port = (p1 << 8) | p2;

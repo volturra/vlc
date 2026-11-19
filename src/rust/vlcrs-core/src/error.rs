@@ -215,7 +215,7 @@ impl Error {
         StorageFull            => ENOSPC,
         TimedOut               => ETIMEDOUT,
         TooManyLinks           => EMLINK,
-        Unsupported            => ENOSYS | ENOTSUP | EOPNOTSUPP,
+        Unsupported            => ENOTSUP | ENOSYS | EOPNOTSUPP,
         WouldBlock             => EAGAIN | EWOULDBLOCK,
         // [^1]: See https://www.gnu.org/software/gnulib/manual/html_node/errno_002eh.html
     }

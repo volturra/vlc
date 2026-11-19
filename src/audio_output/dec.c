@@ -582,6 +582,11 @@ static void stream_Silence (vlc_aout_stream *stream, vlc_tick_t length, vlc_tick
     size_t frames = samples_from_vlc_tick(length, fmt->i_rate);
     size_t size = frames * fmt->i_bytes_per_frame / fmt->i_frame_length;
 
+    /* A gap shorter than one frame yields an empty block, which output
+     * modules must not receive (see stream_Play()). */
+    if (size == 0)
+        return;
+
     block_t *block = block_Alloc (size);
     if (unlikely(block == NULL))
         return; /* uho! */

@@ -1361,6 +1361,9 @@ static void *Thread( void *obj )
             {
                 p_intf->p_compositor->destroyMainInterface();
                 p_intf->p_compositor.reset();
+                // the QML engine is destroyed along with the compositor, the
+                // types must be cleared before the next one creates its engine
+                MainUI::clearPendingQMLTypes();
             }
         } while(!ret);
 

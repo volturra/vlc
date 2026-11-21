@@ -646,7 +646,14 @@ static int GetMenuEntries( extensions_manager_t *p_mgr, extension_t *p_ext,
     vlc_mutex_lock(&sys->running_lock);
 
     int i_ret = VLC_EGENERIC;
-    lua_State *L = GetLuaState( p_mgr, p_ext );
+    /* The extension may have been deactivated while waiting for the lock,
+     * do not load the script again in that case. */
+    lua_State *L = sys->L;
+    if (L == NULL)
+    {
+        msg_Dbg( p_mgr, "Can't get menu of a deactivated extension!" );
+        goto exit;
+    }
 
     if ((sys->i_capabilities & EXT_HAS_MENU) == 0)
     {

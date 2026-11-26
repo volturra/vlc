@@ -364,7 +364,15 @@ static void* Run( void *data )
 
         /* Run command */
         vlc_mutex_lock(&sys->running_lock);
-        switch( cmd->i_command )
+        if (sys->L == NULL && cmd->i_command != CMD_ACTIVATE
+                           && cmd->i_command != CMD_DEACTIVATE)
+        {
+            /* The Lua state was closed by a deactivation: do not reload the
+             * script (nor touch the destroyed widgets) for a stale command. */
+            vlc_debug(p_ext->logger, "Dropping command %d of deactivated "
+                      "extension '%s'", cmd->i_command, p_ext->psz_name);
+        }
+        else switch( cmd->i_command )
         {
             case CMD_ACTIVATE:
             {

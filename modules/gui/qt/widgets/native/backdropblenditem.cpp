@@ -231,6 +231,9 @@ QSGNode *BackdropBlendItem::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeDat
 
         node->setMaterial(new BackdropBlendMaterial(materialType(), fragmentShader()));
         node->setFlag(QSGNode::OwnsMaterial);
+
+        // The vertices of a new node must be set even if the size did not change:
+        m_dirtyGeometry = true;
     }
 
     // The vertex position may be transformed by the renderer when batching,

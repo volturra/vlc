@@ -514,8 +514,8 @@ ShareEnum(stream_t *access, input_item_node_t *p_node)
          iinfo < ctr_count && ret == VLC_SUCCESS; ++iinfo)
     {
 #if defined(LIBSMB2_SRVSVC_V2)
-        const char *name = ctr->netname;
-        uint32_t type = ctr->type;
+        const char *name = ctr[iinfo].netname;
+        uint32_t type = ctr[iinfo].type;
 #elif defined(LIBSMB2_SHARE_ENUM_V2)
        struct srvsvc_SHARE_INFO_1 *info = &ctr->Buffer->share_info_1[iinfo];
        const char *name = info->netname.utf8;

@@ -275,10 +275,23 @@ if xcb_dep.found()
         )
 
     if xcb_randr_dep.found() and xproto_dep.found()
+        xcb_window_sources = files('xcb/window.c')
+        xcb_window_deps = [xcb_dep, xcb_randr_dep, xproto_dep]
+        xcb_window_c_args = []
+
+        # Hotkeys
+        xkbcommon_x11_dep = dependency('xkbcommon-x11', required: false)
+        if xkbcommon_x11_dep.found() and xcb_xkb_dep.found()
+            xcb_window_sources += files('xcb/xkb.c')
+            xcb_window_deps += [xcb_xkb_dep, xkbcommon_x11_dep]
+            xcb_window_c_args += '-DHAVE_XKBCOMMON'
+        endif
+
         vlc_modules += {
             'name' : 'xcb_window',
-            'sources' : files('xcb/window.c'),
-            'dependencies' : [xcb_dep, xcb_randr_dep, xproto_dep],
+            'sources' : xcb_window_sources,
+            'dependencies' : xcb_window_deps,
+            'c_args' : xcb_window_c_args,
             'plugin_dir' : 'video_output',
         }
     endif

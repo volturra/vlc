@@ -255,12 +255,13 @@ endif
 #
 
 if xcb_dep.found()
-    vlc_xcb_events_lib = library('vlc_xcb_events',
+    vlc_xcb_events_lib = shared_library('vlc_xcb_events',
         files('xcb/events.c'),
         include_directories: [vlc_include_dirs],
         link_args: gc_sections_linkargs,
         dependencies: [xcb_dep, libvlccore_dep],
         install: true,
+        version: '0.0.0',
         install_dir: pkglibdir_path,
         )
 
@@ -282,6 +283,7 @@ if xcb_dep.found()
             ),
             'dependencies' : [xcb_dep, xcb_render_dep, xcb_shm_dep, m_lib],
             'link_with' : [vlc_xcb_events_lib],
+            'install_rpath' : pkglibdir_path,
             'plugin_dir' : 'video_output',
         }
     endif
@@ -295,6 +297,7 @@ if xcb_dep.found()
             ),
             'dependencies' : [xcb_dep, xcb_shm_dep],
             'link_with' : [vlc_xcb_events_lib],
+            'install_rpath' : pkglibdir_path,
             'plugin_dir' : 'video_output',
         }
     endif

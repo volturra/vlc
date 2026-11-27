@@ -124,6 +124,7 @@ vlc_modules += {
     'sources' : files('pipewire.c'),
     'dependencies' : [pipewire_dep],
     'link_with' : [libvlc_pipewire],
+    'install_rpath' : pkglibdir_path,
     'plugin_dir' : 'access',
     'enabled' : pipewire_dep.found(),
 }
@@ -134,6 +135,7 @@ vlc_modules += {
     'sources' : files('pulse.c'),
     'dependencies' : [pulse_dep],
     'link_with' : [libvlc_pulse],
+    'install_rpath' : pkglibdir_path,
     'plugin_dir' : 'access',
     'enabled' : pulse_dep.found(),
 }

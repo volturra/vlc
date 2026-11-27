@@ -96,6 +96,7 @@ vlc_modules += {
     'name' : 'pipewirelist',
     'sources' : files('pipewire.c'),
     'link_with' : [libvlc_pipewire],
+    'install_rpath' : pkglibdir_path,
     'dependencies' : [pipewire_dep],
     'plugin_dir' : 'services_discovery',
     'enabled' : pipewire_dep.found(),
@@ -107,6 +108,7 @@ if pulse_dep.found()
         'name' : 'pulselist',
         'sources' : files('pulse.c'),
         'link_with' : [libvlc_pulse],
+        'install_rpath' : pkglibdir_path,
         'dependencies' : [pulse_dep],
         'plugin_dir' : 'services_discovery',
     }

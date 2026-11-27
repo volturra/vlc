@@ -165,14 +165,15 @@ ksuser_lib = cc.find_library('ksuser',
 
 # PipeWire helper library
 if pipewire_dep.found()
-    libvlc_pipewire = library('vlc_pipewire',
+    libvlc_pipewire = shared_library('vlc_pipewire',
         files('audio_output/vlc_pipewire.c'),
         include_directories: [include_directories('audio_output'), vlc_include_dirs],
         dependencies: [libvlccore_dep, pipewire_dep],
         link_with: [vlc_libcompat],
         link_args: gc_sections_linkargs,
         install: true,
-        install_dir: libdir_path,
+        version: '0.0.0',
+        install_dir: pkglibdir_path,
     )
 else
     libvlc_pipewire = disabler()
@@ -180,14 +181,15 @@ endif
 
 # Pulse audio helper library
 if pulse_dep.found()
-    libvlc_pulse = library('vlc_pulse',
+    libvlc_pulse = shared_library('vlc_pulse',
         files('audio_output/vlcpulse.c'),
         include_directories: [include_directories('audio_output'), vlc_include_dirs],
         dependencies: [libvlccore_dep, pulse_dep],
         link_with: [vlc_libcompat],
         link_args: gc_sections_linkargs,
         install: true,
-        install_dir: libdir_path,
+        version: '0.0.0',
+        install_dir: pkglibdir_path,
     )
 else
     libvlc_pulse = disabler()
@@ -475,6 +477,7 @@ foreach module : vlc_modules
         'shortname',
         'plugin_dir',
         'install',
+        'install_rpath',
     ]
     foreach key : module.keys()
         if key not in valid_dict_keys
@@ -539,6 +542,7 @@ foreach module : vlc_modules
         build_by_default: true,
         install: module.get('install', true),
         install_dir: plugin_dir,
+        install_rpath: module.get('install_rpath', ''),
         kwargs: kwargs,
         shortname: shortname,
     )

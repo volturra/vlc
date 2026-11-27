@@ -1,4 +1,5 @@
-# Data files: desktop entries, AppStream metadata, icons and helper scripts
+# Data files: desktop entries, AppStream metadata, icons, helper scripts and
+# Lua scripts documentation
 
 fs = import('fs')
 
@@ -116,5 +117,30 @@ if host_system != 'windows'
         'utils/video-vlc-default.sh',
         install_dir: pkgdatadir_path / 'utils',
         install_mode: 'rwxr-xr-x',
+    )
+endif
+
+#
+# Lua scripts documentation
+#
+if host_system != 'windows' and lua_dep.found() and get_option('lua').allowed()
+    install_data(
+        'lua/README.txt',
+        'lua/extensions/README.txt',
+        'lua/http/requests/README.txt',
+        'lua/intf/README.txt',
+        'lua/intf/dumpmeta.lua',
+        'lua/meta/README.txt',
+        'lua/meta/art/README.txt',
+        'lua/meta/art/01_googleimage.lua',
+        'lua/meta/fetcher/README.txt',
+        'lua/meta/reader/README.txt',
+        'lua/meta/reader/filename.lua',
+        'lua/playlist/README.txt',
+        'lua/sd/README.txt',
+        'lua/sd/icecast.lua',
+        'lua/sd/icast.lua',
+        install_dir: docdir_path,
+        preserve_path: true,
     )
 endif

@@ -1232,6 +1232,9 @@ subdir('modules')
 # VLC binaries
 subdir('bin')
 
+# Data files
+subdir('share')
+
 # OS specific packaging
 if host_system == 'windows'
     subdir('extras/package/win32')

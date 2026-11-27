@@ -851,6 +851,11 @@ option('wix',
        value: 'auto',
        description: 'Generate WIX files to create Windows MSI installer')
 
+option('kde_solid_dir',
+       type: 'string',
+       value: 'solid/actions',
+       description: 'KDE Solid actions directory, relative to the data directory unless absolute (empty to install none)')
+
 # TODO: Missing rpi-omxil
 # TODO: Missing gst-decode
 # TODO: Missing libva

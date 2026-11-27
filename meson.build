@@ -1072,7 +1072,7 @@ else
 endif
 libvlc_header_path = vlc_sdk_path / 'include' / vlc_pkg_suffix
 plugins_header_path = vlc_sdk_path / 'include' / vlc_pkg_suffix / 'plugins'
-vlccore_lib_path = vlc_sdk_path / 'lib'
+pkgconfig_path = (host_system == 'windows' ? vlc_sdk_path / 'lib' : libdir_path) / 'pkgconfig'
 
 cdata.set_quoted('LIBDIR', libdir_path)
 cdata.set_quoted('PKGLIBDIR', pkglibdir_path)

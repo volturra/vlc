@@ -76,6 +76,6 @@ pkg.generate(libvlc,
     name: 'libvlc', # name of the .pc file in addition to Name: variable / 'LibVLC control API',
     description: 'VLC media player external control library',
     version: meson.project_version(),
-    install_dir: vlccore_lib_path / 'pkgconfig')
+    install_dir: pkgconfig_path)
 
 meson.override_dependency('libvlc', libvlc_dep)

@@ -988,14 +988,16 @@ if qt6_dep.found()
     prog_python = find_program('python3')
     modules_qrc = []
     foreach module : qml_modules
-        #generates 'res.qrc', 'qmldir.qrc', 'qmldir',
-        run_command(
-            prog_python,
-            meson.current_source_dir() / 'scripts/genqrc.py',
-            '-o', meson.current_build_dir() / module['outdir'] / 'res.qrc',
-            '--prefix', 'qt/qml' / module['outdir'],
-            '--sources', module.get('sources', []) + module.get('singletons', []),
-            check: true,
+        #generates the resource files and 'qmldir'
+        module_res_qrc = configure_file(
+            output: module['target'] + '_res.qrc',
+            command: [
+                prog_python,
+                meson.current_source_dir() / 'scripts/genqrc.py',
+                '-o', '@OUTPUT@',
+                '--prefix', 'qt/qml' / module['outdir'],
+                '--sources', module.get('sources', []) + module.get('singletons', []),
+            ],
         )
         run_command(
             prog_python,
@@ -1007,20 +1009,19 @@ if qt6_dep.found()
             '--singletons', module.get('singletons', []),
             check: true,
         )
-        run_command(
-            prog_python,
-            meson.current_source_dir() / 'scripts/genqrc.py',
-            '-o', meson.current_build_dir() / module['outdir'] / 'qmldir.qrc',
-            '--prefix', 'qt/qml' / module['outdir'],
-            '--sources', [meson.current_build_dir() / module['outdir'] / 'qmldir'],
-            check: true,
+        module_qmldir_qrc = configure_file(
+            output: module['target'] + '_qmldir.qrc',
+            command: [
+                prog_python,
+                meson.current_source_dir() / 'scripts/genqrc.py',
+                '-o', '@OUTPUT@',
+                '--prefix', 'qt/qml' / module['outdir'],
+                '--sources', [meson.current_build_dir() / module['outdir'] / 'qmldir'],
+            ],
         )
         module_qrc = qt6.preprocess(
             module['target'] + '_assets',
-            qresources: files(
-                meson.current_build_dir() / module['outdir'] / 'res.qrc',
-                meson.current_build_dir() / module['outdir'] / 'qmldir.qrc',
-            ),
+            qresources: [module_res_qrc, module_qmldir_qrc],
             include_directories: qt_include_dir,
             dependencies: qt6_dep,
             rcc_extra_arguments: qt_rcc_extra_arguments

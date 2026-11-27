@@ -212,6 +212,21 @@ if drm_dep.found()
     }
 endif
 
+# Direct Rendering Manager display
+if drm_dep.found() or cc.has_header('drm/drm_mode.h')
+    vlc_modules += {
+        'name' : 'drm_display',
+        'sources' : files(
+            'drm/fourcc.c',
+            'drm/buffers.c',
+            'drm/planes.c',
+            'drm/display.c',
+        ),
+        'dependencies' : [drm_includes],
+        'plugin_dir' : 'video_output',
+    }
+endif
+
 # Coloured ASCII art (Caca)
 caca_dep = dependency('caca', version: '>= 0.99.beta14', required: get_option('caca'))
 caca_deps = [ caca_dep ]

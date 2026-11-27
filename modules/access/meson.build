@@ -124,6 +124,7 @@ vlc_modules += {
     'sources' : files('pipewire.c'),
     'dependencies' : [pipewire_dep],
     'link_with' : [libvlc_pipewire],
+    'install_rpath' : pkglibdir_path,
     'plugin_dir' : 'access',
     'enabled' : pipewire_dep.found(),
 }
@@ -134,6 +135,7 @@ vlc_modules += {
     'sources' : files('pulse.c'),
     'dependencies' : [pulse_dep],
     'link_with' : [libvlc_pulse],
+    'install_rpath' : pkglibdir_path,
     'plugin_dir' : 'access',
     'enabled' : pulse_dep.found(),
 }
@@ -260,8 +262,58 @@ if (get_option('linsys')
     endif
 endif
 
-live555_dep = dependency('live555', version: '>= 2011.12.23', required: get_option('live555'))
-# TODO support without pkg-config
+live555_dep = dependency('', required: false)
+if get_option('live555').allowed()
+    live555_dep = dependency('live555', version: '>= 2011.12.23', required: false)
+endif
+if get_option('live555').allowed() and not live555_dep.found()
+    # Without pkg-config: look for the headers and the libraries, in the
+    # contribs when they have live555 or else in the system of a native build
+    live555_incdir = ''
+    if contrib_dir != '' and import('fs').exists(contrib_incdir / 'UsageEnvironment/UsageEnvironment.hh')
+        live555_incdir = contrib_incdir
+    elif not meson.is_cross_build()
+        live555_incdir = '/usr/include'
+    endif
+
+    live555_inc_args = []
+    foreach d : ['liveMedia', 'groupsock', 'BasicUsageEnvironment', 'UsageEnvironment']
+        live555_inc_args += '-I' + live555_incdir / d
+    endforeach
+    if host_system == 'sunos'
+        live555_inc_args += '-DSOLARIS'
+    endif
+
+    # The _pic variants are the static libraries usable in a plugin
+    live555_lib_suffix = ''
+    if cpp.find_library('liveMedia_pic', dirs: contrib_libdir, required: false).found()
+        live555_lib_suffix = '_pic'
+    endif
+    live555_libs = []
+    foreach l : ['liveMedia', 'groupsock', 'BasicUsageEnvironment', 'UsageEnvironment']
+        live555_libs += cpp.find_library(l + live555_lib_suffix, dirs: contrib_libdir, required: false)
+    endforeach
+
+    live555_found = live555_incdir != '' and cpp.compiles('''
+        #include <liveMedia_version.hh>
+        #if !defined (LIVEMEDIA_LIBRARY_VERSION_INT) || (LIVEMEDIA_LIBRARY_VERSION_INT < 1324598400)
+        # error live555 2011.12.23 or later is required
+        #endif
+        ''',
+        args: live555_inc_args,
+        name: 'live555 version 2011.12.23 or later')
+    foreach l : live555_libs
+        live555_found = live555_found and l.found()
+    endforeach
+
+    if live555_found
+        live555_dep = declare_dependency(
+            compile_args: live555_inc_args,
+            dependencies: live555_libs)
+    elif get_option('live555').enabled()
+        error('live555 2011.12.23 or later is required for RTSP input through live555')
+    endif
+endif
 vlc_modules += {
     'name' : 'live555',
     'sources' : files('live555.cpp', 'live555_dtsgen.h',
@@ -449,6 +501,20 @@ if host_system == 'linux'
             ],
             'c_args' : ['-DHAVE_LINUX_DVB'],
             'plugin_dir' : 'access',
+        }
+
+        # Linux DVB scanner
+        vlc_modules += {
+            'name' : 'dvb',
+            'sources' : files(
+                'dvb/access.c',
+                'dvb/linux_dvb.c',
+                'dvb/scan.c',
+                'dvb/scan_list.c',
+            ),
+            'dependencies' : [libdvbpsi_dep],
+            'plugin_dir' : 'access',
+            'enabled' : libdvbpsi_dep.found(),
         }
     else
         message('Has Linux DVB 5.1 or higher: NO')

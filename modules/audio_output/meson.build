@@ -29,6 +29,7 @@ vlc_modules += {
     'sources' : files('pipewire.c'),
     'dependencies' : [m_lib, pipewire_dep],
     'link_with' : [libvlc_pipewire],
+    'install_rpath' : pkglibdir_path,
     'plugin_dir' : 'audio_output',
     'enabled' : pipewire_dep.found(),
 }
@@ -40,6 +41,7 @@ if pulse_dep.found()
         'sources' : files('pulse.c'),
         'dependencies' : [m_lib, pulse_dep],
         'link_with' : [libvlc_pulse],
+        'install_rpath' : pkglibdir_path,
         'plugin_dir' : 'audio_output',
     }
 endif

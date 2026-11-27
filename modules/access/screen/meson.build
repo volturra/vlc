@@ -9,6 +9,34 @@ if get_option('screen').allowed()
       }
   endif
 
+  # Wayland screen grab
+  if have_wayland
+      wayland_client_dep = wayland_deps[0]
+      screenshooter_client_hdr = custom_target(
+          'wayland-screenshooter-client-header',
+          output: 'screenshooter-client-protocol.h',
+          input: 'screenshooter.xml',
+          command: [wayland_scanner, 'client-header', '@INPUT@', '@OUTPUT@'],
+      )
+      screenshooter_code = custom_target(
+          'wayland-screenshooter-code',
+          output: 'screenshooter-protocol.c',
+          input: 'screenshooter.xml',
+          command: [wayland_scanner, 'private-code', '@INPUT@', '@OUTPUT@'],
+      )
+
+      vlc_modules += {
+          'name' : 'wl_screenshooter',
+          'sources' : [
+              files('wayland.c'),
+              screenshooter_client_hdr,
+              screenshooter_code,
+          ],
+          'dependencies' : [wayland_client_dep, m_lib],
+          'plugin_dir' : 'access',
+      }
+  endif
+
   # screen
   if host_system == 'windows' or have_osx
     screen_files = files(

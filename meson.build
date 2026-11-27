@@ -1040,8 +1040,10 @@ cdata.set_quoted('COPYRIGHT_MESSAGE',   f'Copyright © @vlc_copyright_years@ the
 
 # Compiler and build system info
 cdata.set_quoted('VLC_COMPILER',        cc.get_id() + ' ' + cc.version())
-cdata.set_quoted('VLC_COMPILE_BY',      '[not implemented with meson]') # TODO
-cdata.set_quoted('VLC_COMPILE_HOST',    '[not implemented with meson]') # TODO
+compile_info = run_command(find_program('buildsystem/compile-info.py'),
+    check: true).stdout().strip().split('\n')
+cdata.set_quoted('VLC_COMPILE_BY',      compile_info[0])
+cdata.set_quoted('VLC_COMPILE_HOST',    compile_info[1])
 
 # Paths
 prefix_path = get_option('prefix')
@@ -1049,6 +1051,7 @@ vlc_pkg_suffix = meson.project_name().to_lower()
 
 sysdatadir_path = prefix_path / get_option('datadir')
 pkgdatadir_path = sysdatadir_path / vlc_pkg_suffix
+docdir_path = sysdatadir_path / 'doc' / vlc_pkg_suffix
 if host_system == 'windows'
     libdir_path = prefix_path
     pkglibdir_path = libdir_path / vlc_pkg_suffix
@@ -1070,7 +1073,7 @@ else
 endif
 libvlc_header_path = vlc_sdk_path / 'include' / vlc_pkg_suffix
 plugins_header_path = vlc_sdk_path / 'include' / vlc_pkg_suffix / 'plugins'
-vlccore_lib_path = vlc_sdk_path / 'lib'
+pkgconfig_path = (host_system == 'windows' ? vlc_sdk_path / 'lib' : libdir_path) / 'pkgconfig'
 
 cdata.set_quoted('LIBDIR', libdir_path)
 cdata.set_quoted('PKGLIBDIR', pkglibdir_path)
@@ -1229,6 +1232,12 @@ subdir('modules')
 
 # VLC binaries
 subdir('bin')
+
+# Data files
+subdir('share')
+
+# Documentation
+subdir('doc')
 
 # OS specific packaging
 if host_system == 'windows'

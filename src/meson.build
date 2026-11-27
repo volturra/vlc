@@ -528,6 +528,29 @@ libvlccore = library(
 
 libvlccore_dep = declare_dependency(link_with: libvlccore, sources: vlc_about)
 
+if host_system != 'windows'
+    vlc_plugin_pc_cflags = ['-DVLC_DYNAMIC_PLUGIN', '-D_FILE_OFFSET_BITS=64']
+    if host_machine.endian() == 'big'
+        vlc_plugin_pc_cflags += '-DWORDS_BIGENDIAN=1'
+    endif
+    import('pkgconfig').generate(
+        filebase: 'vlc-plugin',
+        libraries: ['-L${libdir}', '-lvlccore'],
+        libraries_private: [intl_dep, iconv_dep, socket_libs, dl_lib, m_lib],
+        name: 'VLC plugin API',
+        description: 'VLC media player plugin interface',
+        version: meson.project_version(),
+        subdirs: ['.', vlc_pkg_suffix / 'plugins'],
+        extra_cflags: vlc_plugin_pc_cflags,
+        variables: [
+            'pkgincludedir=${includedir}/' + vlc_pkg_suffix,
+            'pkgdatadir=${datadir}/' + vlc_pkg_suffix,
+            'pkglibdir=${libdir}/' + vlc_pkg_suffix,
+            'pluginsdir=${pkglibdir}/plugins',
+        ],
+        install_dir: pkgconfig_path)
+endif
+
 vlc_tests += {
     'name' : 'input_es_out',
     'sources' : files(

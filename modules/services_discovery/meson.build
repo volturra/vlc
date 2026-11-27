@@ -32,6 +32,29 @@ if avahi_dep.found()
     }
 endif
 
+# UDisks2 block devices, over sd-bus
+sdbus_dep = disabler()
+if get_option('udisks').allowed()
+    foreach provider : ['systemd', 'elogind', 'basu']
+        if not sdbus_dep.found()
+            sdbus_dep = dependency(provider == 'basu' ? 'basu' : 'lib' + provider, required: false)
+            sdbus_header = f'-DSDBUS_HEADER=<@provider@/sd-bus.h>'
+        endif
+    endforeach
+    if get_option('udisks').enabled() and not sdbus_dep.found()
+        error('UDisks services discovery requires a sd-bus provider (systemd, elogind or basu)')
+    endif
+endif
+if sdbus_dep.found()
+    vlc_modules += {
+        'name' : 'udisks',
+        'sources' : files('udisks.c'),
+        'c_args' : [sdbus_header],
+        'dependencies' : [sdbus_dep],
+        'plugin_dir' : 'services_discovery',
+    }
+endif
+
 # MTP devices support
 mtp_dep = dependency('libmtp', version: '>= 1.0.0', required: get_option('mtp'))
 if mtp_dep.found()
@@ -81,6 +104,16 @@ if upnp_dep.found()
             '../control/upnp_server/FileHandler.hpp',
             '../control/upnp_server/upnp_server.cpp',
         )
+
+        # Descriptions and icons served by the UPnP server
+        install_data(
+            '../../share/upnp_server/ContentDirectory.xml',
+            '../../share/upnp_server/ConnectionManager.xml',
+            '../../share/upnp_server/X_MS_MediaReceiverRegistrar.xml',
+            '../../share/upnp_server/vlc.png',
+            '../../share/upnp_server/vlc512x512.png',
+            install_dir: pkgdatadir_path / 'upnp_server',
+        )
     endif
 
     vlc_modules += {
@@ -96,6 +129,7 @@ vlc_modules += {
     'name' : 'pipewirelist',
     'sources' : files('pipewire.c'),
     'link_with' : [libvlc_pipewire],
+    'install_rpath' : pkglibdir_path,
     'dependencies' : [pipewire_dep],
     'plugin_dir' : 'services_discovery',
     'enabled' : pipewire_dep.found(),
@@ -107,6 +141,7 @@ if pulse_dep.found()
         'name' : 'pulselist',
         'sources' : files('pulse.c'),
         'link_with' : [libvlc_pulse],
+        'install_rpath' : pkglibdir_path,
         'dependencies' : [pulse_dep],
         'plugin_dir' : 'services_discovery',
     }

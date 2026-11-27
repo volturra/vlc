@@ -49,6 +49,9 @@
 /* Define to 1 for stream output support. */
 #mesondefine ENABLE_SOUT
 
+/* Define to 1 for the UPnP server in the upnp plugin. */
+#mesondefine ENABLE_UPNP_SERVER
+
 /* Define if you want the VideoLAN manager support */
 #mesondefine ENABLE_VLM
 

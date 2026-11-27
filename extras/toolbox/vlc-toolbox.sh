@@ -29,34 +29,43 @@ RELEASE=${VLC_TOOLBOX_RELEASE:-$VERSION_ID}
 
 PACKAGES="
     gcc gcc-c++ meson ninja-build flex bison pkgconf-pkg-config gettext-devel lua
+    desktop-file-utils
     ffmpeg-devel libplacebo-devel libva-devel libvdpau-devel nv-codec-headers
     libdrm-devel mesa-libGL-devel mesa-libEGL-devel mesa-libgbm-devel vulkan-loader-devel
     libX11-devel libxcb-devel xcb-util-keysyms-devel libxkbcommon-devel libxkbcommon-x11-devel
+    libXpm-devel libXinerama-devel libXcursor-devel
     wayland-devel wayland-protocols-devel
     qt6-qtbase-devel qt6-qtbase-private-devel qt6-qtdeclarative-devel qt6-qtsvg-devel
     qt6-qtshadertools-devel qt6-qt5compat-devel qt6-qtwayland-devel
     pipewire-devel pulseaudio-libs-devel alsa-lib-devel
+    pipewire-jack-audio-connection-kit-devel
     freetype-devel fribidi-devel harfbuzz-devel fontconfig-devel libass-devel
-    libpng-devel libjpeg-turbo-devel zvbi-devel
+    libpng-devel libjpeg-turbo-devel librsvg2-devel zvbi-devel
+    libkate-devel aribb24-devel libaribcaption-devel
     libgcrypt-devel gnutls-devel libxml2-devel lua-devel taglib-devel
     libidn2-devel libssh2-devel libnfs-devel srt-devel
-    libebml-devel libmatroska-devel libdav1d-devel libvpx-devel x264-devel x265-devel
-    libmpeg2-devel faad2-devel mpg123-devel flac-devel libvorbis-devel opus-devel
+    libsmbclient-devel libupnp-devel libmtp-devel live555-devel libshout-devel
+    protobuf-devel libmicrodns-devel libvncserver-devel
+    libebml-devel libmatroska-devel libdvbpsi-devel
+    libdav1d-devel libaom-devel libvpx-devel x264-devel x265-devel
+    libmpeg2-devel faad2-devel mpg123-devel libmad-devel twolame-devel
+    flac-devel libvorbis-devel opus-devel speex-devel speexdsp-devel
     libogg-devel libtheora-devel libsamplerate-devel soxr-devel
+    libmodplug-devel game-music-emu-devel fluidsynth-devel
+    libebur128-devel rnnoise-devel libchromaprint-devel
     libarchive-devel libdvdnav-devel libdvdread-devel libbluray-devel
+    libprojectM-devel
     libsecret-devel dbus-devel libnotify-devel
+    ncurses-devel libcaca-devel
 "
-# Not installed: they would be linked in but their runtime libraries are not
-# on a stock Fedora desktop. Install the runtime package on the host first to
-# add one back.
-#   libupnp-devel libmad-devel speexdsp-devel
+# A plugin whose runtime library is missing on the host is skipped when VLC
+# starts: install that library's package on the host to use the plugin.
 
 inbox() {
     toolbox run -c "$BOX" sh -c 'cd "$1" && shift && exec "$@"' sh "$SRCDIR" "$@"
 }
 
-# lib64/vlc holds private libraries used by some plugins
-RPATH="-Wl,-rpath,$PREFIX/lib64:$PREFIX/lib64/vlc"
+RPATH="-Wl,-rpath,$PREFIX/lib64"
 
 setup() {
     WIPE=
@@ -67,16 +76,29 @@ setup() {
         "$@"
 }
 
-desktop_files() {
-    mimetypes=$(sed 's/\s*#.*$//g' "$SRCDIR/share/vlc.desktop.mimetypes" | grep -v '^$' | tr '\n' ';')
-    mkdir -p "$DATAHOME/applications"
-    for f in vlc vlc-openbd vlc-opendvd vlc-openvcd vlc-opencda; do
-        sed -e "s|@bindir@|$PREFIX/bin|g" -e "s|@MIMETYPES@|$mimetypes|g" \
-            "$SRCDIR/share/$f.desktop.in" > "$DATAHOME/applications/$f.desktop"
+# VLC's desktop entries and icons in the data directory $1, relative to it
+data_files() {
+    {
+        for f in vlc vlc-openbd vlc-opendvd vlc-openvcd vlc-opencda; do
+            echo "applications/$f.desktop"
+        done
+        for size in 16 32 48 128 256; do
+            for icon in vlc vlc-xmas vlc-aprilfools vlc-kb; do
+                echo "icons/hicolor/${size}x$size/apps/$icon.png"
+                echo "icons/hicolor/${size}x$size/apps/$icon.xpm"
+            done
+        done
+    } | while read -r f; do
+        if [ -f "$1/$f" ]; then
+            echo "$f"
+        fi
     done
-    for size in 16 32 48 128 256; do
-        mkdir -p "$DATAHOME/icons/hicolor/${size}x$size/apps"
-        cp "$SRCDIR/share/icons/${size}x$size/vlc.png" "$DATAHOME/icons/hicolor/${size}x$size/apps/vlc.png"
+}
+
+desktop_files() {
+    data_files "$PREFIX/share" | while read -r f; do
+        mkdir -p "$DATAHOME/$(dirname "$f")"
+        cp "$PREFIX/share/$f" "$DATAHOME/$f"
     done
     update-desktop-database -q "$DATAHOME/applications" 2>/dev/null || true
     gtk-update-icon-cache -q -t "$DATAHOME/icons/hicolor" 2>/dev/null || true
@@ -105,7 +127,7 @@ case "$cmd" in
         ;;
     install)
         inbox meson install -C "$BUILDDIR" --quiet
-        # The cache copied from the build tree is stale once installed
+        # Describe the plugins as they load with the host's libraries
         "$PREFIX/libexec/vlc/vlc-cache-gen" "$PREFIX/lib64/vlc/plugins"
         mkdir -p "$BINHOME"
         for b in vlc cvlc rvlc qvlc svlc nvlc; do
@@ -118,11 +140,8 @@ case "$cmd" in
         for b in vlc cvlc rvlc qvlc svlc nvlc; do
             [ "$(readlink "$BINHOME/$b")" = "$PREFIX/bin/$b" ] && rm -f "$BINHOME/$b"
         done
-        for f in vlc vlc-openbd vlc-opendvd vlc-openvcd vlc-opencda; do
-            rm -f "$DATAHOME/applications/$f.desktop"
-        done
-        for size in 16 32 48 128 256; do
-            rm -f "$DATAHOME/icons/hicolor/${size}x$size/apps/vlc.png"
+        data_files "$DATAHOME" | while read -r f; do
+            rm -f "$DATAHOME/$f"
         done
         rm -rf "$PREFIX"
         update-desktop-database -q "$DATAHOME/applications" 2>/dev/null || true

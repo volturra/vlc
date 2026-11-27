@@ -401,7 +401,6 @@ vlc_modules += {
 
 # TS demux
 aribb24_dep = dependency('aribb24', version: '>= 1.0.1', required: get_option('aribb24'))
-libdvbpsi_dep = dependency('libdvbpsi', version: '>= 1.2.0', required: get_option('libdvbpsi'))
 
 libdvbpsi_c_args = []
 libdvbcsa_dep = dependency('dvbcsa', required: get_option('dvbcsa'))

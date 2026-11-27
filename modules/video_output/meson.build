@@ -212,6 +212,21 @@ if drm_dep.found()
     }
 endif
 
+# Direct Rendering Manager display
+if drm_dep.found() or cc.has_header('drm/drm_mode.h')
+    vlc_modules += {
+        'name' : 'drm_display',
+        'sources' : files(
+            'drm/fourcc.c',
+            'drm/buffers.c',
+            'drm/planes.c',
+            'drm/display.c',
+        ),
+        'dependencies' : [drm_includes],
+        'plugin_dir' : 'video_output',
+    }
+endif
+
 # Coloured ASCII art (Caca)
 caca_dep = dependency('caca', version: '>= 0.99.beta14', required: get_option('caca'))
 caca_deps = [ caca_dep ]
@@ -248,6 +263,15 @@ if vulkan_dep.found()
         'plugin_dir' : 'video_output',
         'enabled': host_system == 'android'
     }
+
+    vlc_modules += {
+        'name' : 'vk_x11',
+        'sources' : files('vulkan/platform.c', 'vulkan/platform_xcb.c'),
+        'c_args' : ['-DVK_USE_PLATFORM_XCB_KHR', '-DPLATFORM_NAME=X11'],
+        'dependencies' : [vulkan_dep, xcb_dep],
+        'plugin_dir' : 'video_output',
+        'enabled': xcb_dep.found(),
+    }
 endif
 
 #
@@ -255,20 +279,34 @@ endif
 #
 
 if xcb_dep.found()
-    vlc_xcb_events_lib = library('vlc_xcb_events',
+    vlc_xcb_events_lib = shared_library('vlc_xcb_events',
         files('xcb/events.c'),
         include_directories: [vlc_include_dirs],
         link_args: gc_sections_linkargs,
         dependencies: [xcb_dep, libvlccore_dep],
         install: true,
+        version: '0.0.0',
         install_dir: pkglibdir_path,
         )
 
     if xcb_randr_dep.found() and xproto_dep.found()
+        xcb_window_sources = files('xcb/window.c')
+        xcb_window_deps = [xcb_dep, xcb_randr_dep, xproto_dep]
+        xcb_window_c_args = []
+
+        # Hotkeys
+        xkbcommon_x11_dep = dependency('xkbcommon-x11', required: false)
+        if xkbcommon_x11_dep.found() and xcb_xkb_dep.found()
+            xcb_window_sources += files('xcb/xkb.c')
+            xcb_window_deps += [xcb_xkb_dep, xkbcommon_x11_dep]
+            xcb_window_c_args += '-DHAVE_XKBCOMMON'
+        endif
+
         vlc_modules += {
             'name' : 'xcb_window',
-            'sources' : files('xcb/window.c'),
-            'dependencies' : [xcb_dep, xcb_randr_dep, xproto_dep],
+            'sources' : xcb_window_sources,
+            'dependencies' : xcb_window_deps,
+            'c_args' : xcb_window_c_args,
             'plugin_dir' : 'video_output',
         }
     endif
@@ -282,6 +320,7 @@ if xcb_dep.found()
             ),
             'dependencies' : [xcb_dep, xcb_render_dep, xcb_shm_dep, m_lib],
             'link_with' : [vlc_xcb_events_lib],
+            'install_rpath' : pkglibdir_path,
             'plugin_dir' : 'video_output',
         }
     endif
@@ -295,6 +334,19 @@ if xcb_dep.found()
             ),
             'dependencies' : [xcb_dep, xcb_shm_dep],
             'link_with' : [vlc_xcb_events_lib],
+            'install_rpath' : pkglibdir_path,
+            'plugin_dir' : 'video_output',
+        }
+    endif
+
+    if egl_dep.found()
+        vlc_modules += {
+            'name' : 'xcb_egl',
+            'sources' : files('opengl/egl.c'),
+            'c_args' : ['-DUSE_PLATFORM_XCB=1'],
+            'dependencies' : [egl_dep, xcb_dep],
+            'link_with' : [vlc_xcb_events_lib],
+            'install_rpath' : pkglibdir_path,
             'plugin_dir' : 'video_output',
         }
     endif

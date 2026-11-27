@@ -215,6 +215,11 @@ option('libva',
     value: 'auto',
     description: 'VAAPI GPU decoding support (libVA)')
 
+option('vdpau',
+    type: 'feature',
+    value: 'auto',
+    description: 'VDPAU GPU decoding support (libvdpau)')
+
 option('omxil',
     type: 'boolean',
     value: false,
@@ -420,6 +425,11 @@ option('goom2',
     value : 'auto',
     description : 'Enable/disable goom2 visualization plugin')
 
+option('udisks',
+    type : 'feature',
+    value : 'auto',
+    description : 'Enable/disable UDisks2 block devices discovery plugin (requires sd-bus)')
+
 option('avahi',
     type : 'feature',
     value : 'auto',
@@ -469,6 +479,11 @@ option('libsecret',
     type : 'feature',
     value : 'auto',
     description : 'Enable/disable libsecret support')
+
+option('notify',
+    type : 'feature',
+    value : 'auto',
+    description : 'Enable/disable libnotify notification plugin')
 
 option('matroska',
     type : 'feature',
@@ -851,12 +866,16 @@ option('wix',
        value: 'auto',
        description: 'Generate WIX files to create Windows MSI installer')
 
+option('kde_solid_dir',
+       type: 'string',
+       value: 'solid/actions',
+       description: 'KDE Solid actions directory, relative to the data directory unless absolute (empty to install none)')
+
 # TODO: Missing rpi-omxil
 # TODO: Missing gst-decode
 # TODO: Missing libva
 # TODO: Missing tremor
 # TODO: Missing x26410b
-# TODO: Missing vdpau
 # TODO: Missing mmal
 # TODO: Missing jack
 # TODO: Missing opensles

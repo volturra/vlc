@@ -248,6 +248,15 @@ if vulkan_dep.found()
         'plugin_dir' : 'video_output',
         'enabled': host_system == 'android'
     }
+
+    vlc_modules += {
+        'name' : 'vk_x11',
+        'sources' : files('vulkan/platform.c', 'vulkan/platform_xcb.c'),
+        'c_args' : ['-DVK_USE_PLATFORM_XCB_KHR', '-DPLATFORM_NAME=X11'],
+        'dependencies' : [vulkan_dep, xcb_dep],
+        'plugin_dir' : 'video_output',
+        'enabled': xcb_dep.found(),
+    }
 endif
 
 #
@@ -296,6 +305,18 @@ if xcb_dep.found()
               'xcb/x11.c'
             ),
             'dependencies' : [xcb_dep, xcb_shm_dep],
+            'link_with' : [vlc_xcb_events_lib],
+            'install_rpath' : pkglibdir_path,
+            'plugin_dir' : 'video_output',
+        }
+    endif
+
+    if egl_dep.found()
+        vlc_modules += {
+            'name' : 'xcb_egl',
+            'sources' : files('opengl/egl.c'),
+            'c_args' : ['-DUSE_PLATFORM_XCB=1'],
+            'dependencies' : [egl_dep, xcb_dep],
             'link_with' : [vlc_xcb_events_lib],
             'install_rpath' : pkglibdir_path,
             'plugin_dir' : 'video_output',

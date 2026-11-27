@@ -389,13 +389,12 @@ if get_option('qt').allowed() and qt6_dep.found()
         files('gui/qt/vlc-qt-check.cpp'),
         dependencies: [qt6_dep, qt_extra_deps],
         include_directories: [vlc_include_dirs],
-        link_args: gc_sections_linkargs,
+        link_args: qt_link_args,
         build_by_default: enable_qt_check,
         install: enable_qt_check,
         install_dir: pkglibexecdir_path,
         c_args : qt_extra_flags,
         cpp_args : qt_extra_flags,
-        link_args : qt_link_args,
     )
 endif
 

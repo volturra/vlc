@@ -32,6 +32,29 @@ if avahi_dep.found()
     }
 endif
 
+# UDisks2 block devices, over sd-bus
+sdbus_dep = disabler()
+if get_option('udisks').allowed()
+    foreach provider : ['systemd', 'elogind', 'basu']
+        if not sdbus_dep.found()
+            sdbus_dep = dependency(provider == 'basu' ? 'basu' : 'lib' + provider, required: false)
+            sdbus_header = f'-DSDBUS_HEADER=<@provider@/sd-bus.h>'
+        endif
+    endforeach
+    if get_option('udisks').enabled() and not sdbus_dep.found()
+        error('UDisks services discovery requires a sd-bus provider (systemd, elogind or basu)')
+    endif
+endif
+if sdbus_dep.found()
+    vlc_modules += {
+        'name' : 'udisks',
+        'sources' : files('udisks.c'),
+        'c_args' : [sdbus_header],
+        'dependencies' : [sdbus_dep],
+        'plugin_dir' : 'services_discovery',
+    }
+endif
+
 # MTP devices support
 mtp_dep = dependency('libmtp', version: '>= 1.0.0', required: get_option('mtp'))
 if mtp_dep.found()

@@ -420,6 +420,11 @@ option('goom2',
     value : 'auto',
     description : 'Enable/disable goom2 visualization plugin')
 
+option('udisks',
+    type : 'feature',
+    value : 'auto',
+    description : 'Enable/disable UDisks2 block devices discovery plugin (requires sd-bus)')
+
 option('avahi',
     type : 'feature',
     value : 'auto',

@@ -475,6 +475,11 @@ option('libsecret',
     value : 'auto',
     description : 'Enable/disable libsecret support')
 
+option('notify',
+    type : 'feature',
+    value : 'auto',
+    description : 'Enable/disable libnotify notification plugin')
+
 option('matroska',
     type : 'feature',
     value : 'auto',

@@ -334,6 +334,9 @@ subdir('logger')
 # misc modules
 subdir('misc')
 
+# notification modules
+subdir('notify')
+
 # meta engine modules
 subdir('meta_engine')
 

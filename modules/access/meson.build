@@ -502,6 +502,20 @@ if host_system == 'linux'
             'c_args' : ['-DHAVE_LINUX_DVB'],
             'plugin_dir' : 'access',
         }
+
+        # Linux DVB scanner
+        vlc_modules += {
+            'name' : 'dvb',
+            'sources' : files(
+                'dvb/access.c',
+                'dvb/linux_dvb.c',
+                'dvb/scan.c',
+                'dvb/scan_list.c',
+            ),
+            'dependencies' : [libdvbpsi_dep],
+            'plugin_dir' : 'access',
+            'enabled' : libdvbpsi_dep.found(),
+        }
     else
         message('Has Linux DVB 5.1 or higher: NO')
     endif

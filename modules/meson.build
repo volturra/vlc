@@ -212,6 +212,9 @@ avutil_dep   = dependency('libavutil', version: '>= 56.70.100', required: false)
 # Freetype, used by text_renderer and ASS access
 freetype_dep = dependency('freetype2', 'freetype', required: get_option('freetype'))
 
+# libdvbpsi, used by DVB access, TS demux and TS mux
+libdvbpsi_dep = dependency('libdvbpsi', version: '>= 1.2.0', required: get_option('libdvbpsi'))
+
 # ZVBI, used by Linsys SDI access and VBI/Teletext decoders
 zvbi_dep = dependency('zvbi-0.2', version: '>= 0.2.28', required: false)
 

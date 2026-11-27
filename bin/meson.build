@@ -62,6 +62,17 @@ if build_vlc and (host_system != 'darwin' or have_osx) and not have_win_store an
         win_subsystem: 'windows'
     )
 
+    # Root wrapper
+    if host_system not in ['windows', 'os/2']
+        executable('vlc-wrapper',
+            'rootwrap.c',
+            include_directories: [vlc_include_dirs],
+            dependencies: socket_libs,
+            install: true,
+            install_dir: bindir_path,
+        )
+    endif
+
     # Interface aliases (cvlc, rvlc, ...), as installed by autotools
     if host_system not in ['darwin', 'windows']
         vlc_aliases = { 'cvlc': 'dummy', 'rvlc': 'rc' }

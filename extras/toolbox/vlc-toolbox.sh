@@ -65,8 +65,7 @@ inbox() {
     toolbox run -c "$BOX" sh -c 'cd "$1" && shift && exec "$@"' sh "$SRCDIR" "$@"
 }
 
-# lib64/vlc holds private libraries used by some plugins
-RPATH="-Wl,-rpath,$PREFIX/lib64:$PREFIX/lib64/vlc"
+RPATH="-Wl,-rpath,$PREFIX/lib64"
 
 setup() {
     WIPE=

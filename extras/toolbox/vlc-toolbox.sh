@@ -29,27 +29,37 @@ RELEASE=${VLC_TOOLBOX_RELEASE:-$VERSION_ID}
 
 PACKAGES="
     gcc gcc-c++ meson ninja-build flex bison pkgconf-pkg-config gettext-devel lua
+    desktop-file-utils
     ffmpeg-devel libplacebo-devel libva-devel libvdpau-devel nv-codec-headers
     libdrm-devel mesa-libGL-devel mesa-libEGL-devel mesa-libgbm-devel vulkan-loader-devel
     libX11-devel libxcb-devel xcb-util-keysyms-devel libxkbcommon-devel libxkbcommon-x11-devel
+    libXpm-devel libXinerama-devel libXcursor-devel
     wayland-devel wayland-protocols-devel
     qt6-qtbase-devel qt6-qtbase-private-devel qt6-qtdeclarative-devel qt6-qtsvg-devel
     qt6-qtshadertools-devel qt6-qt5compat-devel qt6-qtwayland-devel
     pipewire-devel pulseaudio-libs-devel alsa-lib-devel
+    pipewire-jack-audio-connection-kit-devel
     freetype-devel fribidi-devel harfbuzz-devel fontconfig-devel libass-devel
-    libpng-devel libjpeg-turbo-devel zvbi-devel
+    libpng-devel libjpeg-turbo-devel librsvg2-devel zvbi-devel
+    libkate-devel aribb24-devel libaribcaption-devel
     libgcrypt-devel gnutls-devel libxml2-devel lua-devel taglib-devel
     libidn2-devel libssh2-devel libnfs-devel srt-devel
-    libebml-devel libmatroska-devel libdav1d-devel libvpx-devel x264-devel x265-devel
-    libmpeg2-devel faad2-devel mpg123-devel flac-devel libvorbis-devel opus-devel
+    libsmbclient-devel libupnp-devel libmtp-devel live555-devel libshout-devel
+    protobuf-devel libmicrodns-devel libvncserver-devel
+    libebml-devel libmatroska-devel libdvbpsi-devel
+    libdav1d-devel libaom-devel libvpx-devel x264-devel x265-devel
+    libmpeg2-devel faad2-devel mpg123-devel libmad-devel twolame-devel
+    flac-devel libvorbis-devel opus-devel speex-devel speexdsp-devel
     libogg-devel libtheora-devel libsamplerate-devel soxr-devel
+    libmodplug-devel game-music-emu-devel fluidsynth-devel
+    libebur128-devel rnnoise-devel libchromaprint-devel
     libarchive-devel libdvdnav-devel libdvdread-devel libbluray-devel
+    libprojectM-devel
     libsecret-devel dbus-devel libnotify-devel
+    ncurses-devel libcaca-devel
 "
-# Not installed: they would be linked in but their runtime libraries are not
-# on a stock Fedora desktop. Install the runtime package on the host first to
-# add one back.
-#   libupnp-devel libmad-devel speexdsp-devel
+# A plugin whose runtime library is missing on the host is skipped when VLC
+# starts: install that library's package on the host to use the plugin.
 
 inbox() {
     toolbox run -c "$BOX" sh -c 'cd "$1" && shift && exec "$@"' sh "$SRCDIR" "$@"

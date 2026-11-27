@@ -145,6 +145,7 @@ if egl_dep.found()
             ],
             'include_directories': [wayland_inc],
             'dependencies': [egl_dep, wayland_egl_dep, gbm_dep, drm_dep],
+            'plugin_dir' : 'video_output',
         }
     endif
 endif

@@ -104,6 +104,16 @@ if upnp_dep.found()
             '../control/upnp_server/FileHandler.hpp',
             '../control/upnp_server/upnp_server.cpp',
         )
+
+        # Descriptions and icons served by the UPnP server
+        install_data(
+            '../../share/upnp_server/ContentDirectory.xml',
+            '../../share/upnp_server/ConnectionManager.xml',
+            '../../share/upnp_server/X_MS_MediaReceiverRegistrar.xml',
+            '../../share/upnp_server/vlc.png',
+            '../../share/upnp_server/vlc512x512.png',
+            install_dir: pkgdatadir_path / 'upnp_server',
+        )
     endif
 
     vlc_modules += {

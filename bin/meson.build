@@ -135,6 +135,17 @@ if build_vlc and (host_system != 'darwin' or have_osx) and not have_win_store an
     )
     endif
 
+    # Plugins cache of the installed tree
+    if not meson.is_cross_build() and host_system not in ['darwin', 'windows']
+        meson.add_install_script(
+            find_program('../buildsystem/gen-plugins-cache.py'),
+            pkglibexecdir_path,
+            libdir_path,
+            pkglibdir_path,
+            plugins_path,
+        )
+    endif
+
     vlc_preparser_sources = [
       'preparser/main.c',
       'preparser/cmdline.c',

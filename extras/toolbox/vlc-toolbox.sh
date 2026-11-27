@@ -77,16 +77,29 @@ setup() {
         "$@"
 }
 
-desktop_files() {
-    mimetypes=$(sed 's/\s*#.*$//g' "$SRCDIR/share/vlc.desktop.mimetypes" | grep -v '^$' | tr '\n' ';')
-    mkdir -p "$DATAHOME/applications"
-    for f in vlc vlc-openbd vlc-opendvd vlc-openvcd vlc-opencda; do
-        sed -e "s|@bindir@|$PREFIX/bin|g" -e "s|@MIMETYPES@|$mimetypes|g" \
-            "$SRCDIR/share/$f.desktop.in" > "$DATAHOME/applications/$f.desktop"
+# VLC's desktop entries and icons in the data directory $1, relative to it
+data_files() {
+    {
+        for f in vlc vlc-openbd vlc-opendvd vlc-openvcd vlc-opencda; do
+            echo "applications/$f.desktop"
+        done
+        for size in 16 32 48 128 256; do
+            for icon in vlc vlc-xmas vlc-aprilfools vlc-kb; do
+                echo "icons/hicolor/${size}x$size/apps/$icon.png"
+                echo "icons/hicolor/${size}x$size/apps/$icon.xpm"
+            done
+        done
+    } | while read -r f; do
+        if [ -f "$1/$f" ]; then
+            echo "$f"
+        fi
     done
-    for size in 16 32 48 128 256; do
-        mkdir -p "$DATAHOME/icons/hicolor/${size}x$size/apps"
-        cp "$SRCDIR/share/icons/${size}x$size/vlc.png" "$DATAHOME/icons/hicolor/${size}x$size/apps/vlc.png"
+}
+
+desktop_files() {
+    data_files "$PREFIX/share" | while read -r f; do
+        mkdir -p "$DATAHOME/$(dirname "$f")"
+        cp "$PREFIX/share/$f" "$DATAHOME/$f"
     done
     update-desktop-database -q "$DATAHOME/applications" 2>/dev/null || true
     gtk-update-icon-cache -q -t "$DATAHOME/icons/hicolor" 2>/dev/null || true
@@ -115,7 +128,7 @@ case "$cmd" in
         ;;
     install)
         inbox meson install -C "$BUILDDIR" --quiet
-        # The cache copied from the build tree is stale once installed
+        # Describe the plugins as they load with the host's libraries
         "$PREFIX/libexec/vlc/vlc-cache-gen" "$PREFIX/lib64/vlc/plugins"
         mkdir -p "$BINHOME"
         for b in vlc cvlc rvlc qvlc svlc nvlc; do
@@ -128,11 +141,8 @@ case "$cmd" in
         for b in vlc cvlc rvlc qvlc svlc nvlc; do
             [ "$(readlink "$BINHOME/$b")" = "$PREFIX/bin/$b" ] && rm -f "$BINHOME/$b"
         done
-        for f in vlc vlc-openbd vlc-opendvd vlc-openvcd vlc-opencda; do
-            rm -f "$DATAHOME/applications/$f.desktop"
-        done
-        for size in 16 32 48 128 256; do
-            rm -f "$DATAHOME/icons/hicolor/${size}x$size/apps/vlc.png"
+        data_files "$DATAHOME" | while read -r f; do
+            rm -f "$DATAHOME/$f"
         done
         rm -rf "$PREFIX"
         update-desktop-database -q "$DATAHOME/applications" 2>/dev/null || true
